@@ -1,0 +1,60 @@
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import {
+  getAuth,
+  signInWithRedirect,
+  signInWithPopup,
+  GoogleAuthProvider,
+} from "firebase/auth";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyBE2U2-HT1zcVErHL_4m56K34j5hPSBLxg",
+  authDomain: "e-shop-course.firebaseapp.com",
+  projectId: "e-shop-course",
+  storageBucket: "e-shop-course.appspot.com",
+  messagingSenderId: "169452856028",
+  appId: "1:169452856028:web:26615e7aea655967fa4a19",
+};
+
+// Initialize Firebase
+const fireBaseApp = initializeApp(firebaseConfig);
+
+const provider = new GoogleAuthProvider();
+
+provider.setCustomParameters({
+  prompt: "select_account",
+});
+
+export const auth = getAuth();
+export const signInWithGooglePopoup = () => {
+  return signInWithPopup(auth, provider);
+};
+
+export const db = getFirestore();
+
+export const createUserDocumentFromAuth = async (userAuth) => {
+  const userDocRef = doc(db, "users", userAuth.uid);
+  console.log(userDocRef);
+
+  const userSnapShot = await getDoc(userDocRef);
+  console.log(userSnapShot);
+  console.log(userSnapShot.exists());
+
+  //Check if userdata exists
+
+  if (!userSnapShot.exists()) {
+    const { displayName, email } = userAuth;
+    const createdAt = new Date();
+    try {
+      await setDoc(userDocRef, { displayName, email, createdAt });
+    } catch (error) {
+      console.log("Error creating user", error.message);
+    }
+  }
+  return userDocRef;
+};
